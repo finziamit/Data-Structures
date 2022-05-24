@@ -1,0 +1,130 @@
+package il.ac.telhai.ds.trees;
+
+class Node<T> {
+	T key;
+	int height;
+	Node<T> left, right;
+
+	Node(T d) {
+		key = d;
+		height = 1;
+	}
+}
+
+public class AVLTree<T extends Comparable<T>>{
+
+	private Node<T> root;
+	public AVLTree(T key){
+		this.root = new Node<>(key);
+	}
+	public AVLTree(){
+		this.root = new Node<>(null);
+	}
+
+	int height(Node<T> N) {
+		if (N == null)
+			return 0;
+
+		return N.height;
+	}
+
+	Node<T> rightRotate(Node<T> y) {
+		Node<T> x = y.left;
+		Node<T> T2 = x.right;
+		x.right = y;
+		y.left = T2;
+		y.height = Math.max(height(y.left), height(y.right)) + 1;
+		x.height = Math.max(height(x.left), height(x.right)) + 1;
+		return x;
+	}
+
+	Node<T> leftRotate(Node<T> x) {
+		Node<T> y = x.right;
+		Node<T> T2 = y.left;
+		y.left = x;
+		x.right = T2;
+		x.height = Math.max(height(x.left), height(x.right)) + 1;
+		y.height = Math.max(height(y.left), height(y.right)) + 1;
+		return y;
+	}
+
+	int getBalance(Node<T> N) {
+		if (N == null)
+			return 0;
+
+		return height(N.left) - height(N.right);
+	}
+
+	//add the value to the tree, and return the updated root of the tree.
+	public AVLTree<T> add(T value){
+		this.root = insert(this.root,value);
+		return this;
+	}
+
+	Node<T> insert(Node<T> node, T key) {
+		if (node == null)
+			return (new Node<>(key));
+		if (key.compareTo(node.key) < 0)
+			node.left = insert(node.left, key);
+		else if (key.compareTo(node.key) > 0)
+			node.right = insert(node.right, key);
+		else
+			throw new RuntimeException("Value is already exist");
+		node.height = 1 + Math.max(height(node.left),height(node.right));
+		int balance = getBalance(node);
+		if (node.left != null) {
+			if (balance > 1 && key.compareTo(node.left.key) < 0)
+				return rightRotate(node);
+			else if (balance < -1 && key.compareTo(node.left.key) > 0)
+				return leftRotate(node);
+			else if (balance > 1 && key.compareTo(node.left.key) > 0) {
+				node.left = leftRotate(node.left);
+				return rightRotate(node);
+			}
+			else if (balance < -1 && key.compareTo(node.left.key) < 0) {
+				node.right = rightRotate(node.right);
+				return leftRotate(node);
+			}
+		}
+		else{
+			if (balance > 1 && key.compareTo(node.right.key) < 0)
+				return rightRotate(node);
+			else if (balance < -1 && key.compareTo(node.right.key) > 0)
+				return leftRotate(node);
+			else if (balance > 1 && key.compareTo(node.right.key) > 0) {
+				node.left = leftRotate(node.right);
+				return rightRotate(node);
+			}
+			else if (balance < -1 && key.compareTo(node.right.key) < 0) {
+				node.right = rightRotate(node.left);
+				return leftRotate(node);
+			}
+		}
+		return node;
+	}
+
+	//return the value in this node
+	public T getValue(){
+		return this.root.key;
+	}
+
+	//return the left subTree of this node
+	public AVLTree<T> getLeft(){
+		if (this.root.left == null){
+			return null;
+		}
+		AVLTree<T> leftTree = new AVLTree<T>();
+		leftTree.root = this.root.left;
+		return leftTree;
+	}
+
+	//return the right subTree of this node
+	public AVLTree<T> getRight(){
+		if (this.root.right == null){
+			return null;
+		}
+		AVLTree<T> rightTree = new AVLTree<T>();
+		rightTree.root = this.root.right;
+		return rightTree;
+	}
+}
