@@ -1,0 +1,113 @@
+package il.ac.telhai.ds.heap;
+
+public class MinHeap<T extends Comparable<T>> {
+    private T [] data;
+    private int numberOfElements;
+    @SuppressWarnings({"unchecked","rawtypes"})
+    public MinHeap(int length) {
+        this.data = (T[]) new Comparable[length+1];
+        this.numberOfElements = 0;
+    }
+
+    @SuppressWarnings({"unchecked","rawtypes"})
+    public MinHeap(T[] arr) {
+        this.data = (T[]) new Comparable[arr.length+1];
+        this.numberOfElements = arr.length;
+        this.data[0] = null;
+        for (int i=1; i<this.numberOfElements+1; i++){
+            this.data[i] = arr[i-1];
+        }
+        for (int i = this.numberOfElements; i>0 ; i--){
+            heapify(this.data, i);
+        }
+    }
+
+    void heapify(T arr[], int i)
+    {	int smallest;
+        int l = 2 * i; // left child node
+        int r = 2 * i + 1; // right child node
+
+        // Check if left child is smaller than its parent
+        if (l <= this.numberOfElements && arr[l].compareTo(arr[i]) < 0)
+            smallest = l;
+        else smallest = i;
+
+        // Check if right child is smaller than smallest
+        if (r <= this.numberOfElements && arr[r].compareTo(arr[smallest]) < 0)
+            smallest = r;
+
+        // If smallest is not parent
+        if (smallest != i) {
+            T swap = arr[i];
+            arr[i] = arr[smallest];
+            arr[smallest] = swap;
+
+            // Recursively heapify the affected sub-tree
+            heapify(arr ,smallest);
+        }
+    }
+
+    public boolean isFull() {
+        return this.data.length-1 == this.numberOfElements;
+    }
+
+    public boolean isEmpty() {
+        return this.numberOfElements == 0;
+    }
+
+    public void insert(T element) {
+        if (isEmpty()){
+            this.data[1] = element;
+            this.numberOfElements++;
+            return;
+        }
+        this.numberOfElements++;
+        int index = this.numberOfElements;
+        this.data[index] = element;
+        while (index > 1 && this.data[index].compareTo(this.data[index/2]) < 0){
+            T temp = this.data[index/2];
+            this.data[index/2] =  this.data[index];
+            this.data[index] = temp;
+            index /= 2;
+        }
+    }
+
+    public T getMin() {
+        if (isEmpty()){
+            throw new RuntimeException();
+        }
+        return this.data[1];
+    }
+
+    public T deleteMin() {
+        if (isEmpty()){
+            return null;
+        }
+        T res = this.data[1];
+        this.data[1] = this.data[this.numberOfElements];
+        this.data[this.numberOfElements] = null;
+        this.numberOfElements --;
+        for (int i = this.numberOfElements; i>0 ; i--){
+            heapify(this.data, i);
+        }
+        return res;
+    }
+
+    /**
+     * return a string represents the heap. The order of the elements are according
+     * to The string starts with "[", ends with "]", and the values are seperated
+     * with a comma
+     */
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        s.append("[");
+        for (int i=1; i<this.numberOfElements+1; i++){
+            s.append(this.data[i]);
+            if (i != this.numberOfElements){
+                s.append(",");
+            }
+        }
+        s.append("]");
+        return s.toString();
+    }
+}
