@@ -1,0 +1,121 @@
+public class SparseMatrix<T> implements Matrix<T>{
+    private  DLinkedList<SparseMatrixEntry> lst;
+    private T defaultvalue;
+    private int size;
+    private boolean transpose;
+    public SparseMatrix (T defaultValue){
+        lst = new DLinkedList<>();
+        this.defaultvalue = defaultValue;
+        size = MAX_SIZE;
+        transpose = false;
+    }
+    public SparseMatrix (int size, T defaultValue){
+        lst = new DLinkedList<>();
+        this.defaultvalue = defaultValue;
+        this.size = size;
+        transpose = false;
+    }
+
+    @Override
+    public T get(int row, int col) {
+        if(row < 1 || col < 1 || row > size || col > size){
+            throw new RuntimeException("IllegalArgumentException");
+        }
+        if(lst.isEmpty()){
+            return this.defaultvalue;
+        }
+        lst.goToBeginning();
+        while (lst.hasNext()){
+            if (transpose){
+                if(lst.getCursor().col == row && lst.getCursor().row == col){
+                    return lst.getCursor().value;
+                }
+            }
+            else if(lst.getCursor().col == col && lst.getCursor().row == row){
+                return lst.getCursor().value;
+            }
+            lst.getNext();
+        }
+        if (transpose){
+            if(lst.getCursor().col == row && lst.getCursor().row == col){
+                return lst.getCursor().value;
+            }
+        }
+        else if(lst.getCursor().col == col && lst.getCursor().row == row){
+            return lst.getCursor().value;
+        }
+        return this.defaultvalue;
+    }
+
+    @Override
+    public void set(int row, int col, T element) {
+        if(row < 1 || col < 1 || row > size || col > size){
+            throw new RuntimeException("IllegalArgumentException");
+        }
+        if (element == defaultvalue){
+            if(get(row,col) != defaultvalue){
+                lst.goToBeginning();
+                while (lst.hasNext()){
+                    if (lst.getCursor().col == col && lst.getCursor().row == row){
+                        lst.remove();
+                    }
+                    lst.getNext();
+                }
+            }
+        }
+        if(lst.isEmpty()){
+            lst.insert(new SparseMatrixEntry(row,col,element));
+        }
+        if(get(row,col) == defaultvalue){
+            lst.insert(new SparseMatrixEntry(row,col,element));
+        }
+        else{
+            lst.goToBeginning();
+            while (lst.hasNext()){
+                if (lst.getCursor().col == col && lst.getCursor().row == row){
+                    lst.getCursor().value = element;
+                }
+                lst.getNext();
+            }
+        }
+    }
+
+    @Override
+    public void transpose() {
+        if (!transpose){
+            transpose = true;
+        }
+        else{
+            transpose = false;
+        }
+    }
+
+    @Override
+    public Matrix<T> getTranspose() {
+        Matrix<T> transposeMatrix = new SparseMatrix<>(size,defaultvalue);
+        lst.goToBeginning();
+        while (lst.hasNext()){
+            transposeMatrix.set(lst.getCursor().col,lst.getCursor().row,lst.getCursor().value);
+            lst.getNext();
+        }
+        transposeMatrix.set(lst.getCursor().col,lst.getCursor().row,lst.getCursor().value);
+        return transposeMatrix;
+    }
+    private class SparseMatrixEntry {
+        private T value;
+        private int row;
+        private int col;
+        public SparseMatrixEntry(int row, int col, T val) {
+            this.row = row;
+            this.col = col;
+            this.value = val;
+        }
+        public int getRow() { return this.row; }
+        public void setRow(int row) { this.row = row; }
+        public int getCol() { return this.col; }
+        public void setCol(int col) { this.col = col; }
+        public T getValue() { return this.value; }
+        public void setValue(T newVal) { this.value = newVal; }
+    }
+}
+
